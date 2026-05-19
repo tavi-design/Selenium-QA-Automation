@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Profile – Task Manager</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<nav>
+  <span class="brand">Task Manager</span>
+  <a href="/dashboard.html">Dashboard</a>
+  <a href="/tasks.html">Tasks</a>
+  <a href="/profile.html" class="active">Profile</a>
+  <span class="spacer"></span>
+  <span id="nav-user" style="font-size:.85rem;color:#94a3b8;margin-right:12px"></span>
+  <button id="logout-btn" onclick="logout()">Logout</button>
+</nav>
+
+<div class="page">
+  <h1>My Profile</h1>
+  <div class="form-card">
+    <form id="profile-form" novalidate>
+      <div class="form-group">
+        <label>Username</label>
+        <input id="username-display" type="text" disabled style="background:#f3f4f6;cursor:not-allowed" />
+      </div>
+      <div class="form-group">
+        <label>Role</label>
+        <input id="role-display" type="text" disabled style="background:#f3f4f6;cursor:not-allowed" />
+      </div>
+      <div class="form-group">
+        <label for="name">Full Name <span style="color:#dc2626">*</span></label>
+        <input id="name" type="text" placeholder="Your name" />
+        <p id="name-error" class="error-msg"></p>
+      </div>
+      <div class="form-group">
+        <label for="email">Email <span style="color:#dc2626">*</span></label>
+        <input id="email" type="email" placeholder="you@example.com" />
+        <p id="email-error" class="error-msg"></p>
+      </div>
+      <p id="profile-error"   class="error-msg"></p>
+      <p id="profile-success" class="success-msg"></p>
+      <button id="save-profile-btn" class="btn btn-primary" type="submit">Save Changes</button>
+    </form>
+  </div>
+</div>
+
+<script src="/js/common.js"></script>
+<script>
+  (async () => {
+    const user = await requireAuth();
+    if (!user) return;
+    document.getElementById("nav-user").textContent          = user.name;
+    document.getElementById("username-display").value        = user.username;
+    document.getElementById("role-display").value            = user.role;
+    document.getElementById("name").value                    = user.name;
+    document.getElementById("email").value                   = user.email;
+  })();
+
+  document.getElementById("profile-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    document.getElementById("name-error").textContent    = "";
+    document.getElementById("email-error").textContent   = "";
+    document.getElementById("profile-error").textContent = "";
+    document.getElementById("profile-success").textContent = "";
+
+    const name  = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+
+    let valid = true;
+    if (!name)  { document.getElementById("name-error").textContent  = "Name is required.";  valid = false; }
+    if (!email) { document.getElementById("email-error").textContent = "Email is required."; valid = false; }
+    if (!valid) return;
+
+    const res = await fetch("/api/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email }),
+    });
+
+    if (res.ok) {
+      document.getElementById("profile-success").textContent = "Profile updated successfully.";
+      document.getElementById("nav-user").textContent = name;
+    } else {
+      const data = await res.json();
+      document.getElementById("profile-error").textContent = data.error || "Update failed.";
+    }
+  });
+</script>
+</body>
+</html>

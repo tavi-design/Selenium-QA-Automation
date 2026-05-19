@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Dashboard – Task Manager</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<nav>
+  <span class="brand">Task Manager</span>
+  <a href="/dashboard.html" class="active">Dashboard</a>
+  <a href="/tasks.html">Tasks</a>
+  <a href="/profile.html">Profile</a>
+  <span class="spacer"></span>
+  <span id="nav-user" style="font-size:.85rem;color:#94a3b8;margin-right:12px"></span>
+  <button id="logout-btn" onclick="logout()">Logout</button>
+</nav>
+
+<div class="page">
+  <h1>Dashboard</h1>
+
+  <div id="stats-grid" class="stats-grid">
+    <div class="stat-card"><div class="stat-value" id="stat-total">—</div><div class="stat-label">Total</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-todo">—</div><div class="stat-label">To Do</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-inprogress">—</div><div class="stat-label">In Progress</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-done">—</div><div class="stat-label">Done</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-blocked">—</div><div class="stat-label">Blocked</div></div>
+    <div class="stat-card overdue"><div class="stat-value" id="stat-overdue">—</div><div class="stat-label">Overdue</div></div>
+    <div class="stat-card critical"><div class="stat-value" id="stat-critical">—</div><div class="stat-label">Critical Open</div></div>
+  </div>
+
+  <div class="top-bar">
+    <h2>Recent Tasks</h2>
+    <a href="/tasks.html" class="btn btn-secondary btn-sm">View all →</a>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Title</th><th>Priority</th><th>Status</th><th>Due</th></tr>
+      </thead>
+      <tbody id="recent-tbody">
+        <tr><td colspan="4" class="empty-state">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="/js/common.js"></script>
+<script>
+  (async () => {
+    const user = await requireAuth();
+    if (!user) return;
+    document.getElementById("nav-user").textContent = user.name;
+
+    const [statsRes, tasksRes] = await Promise.all([
+      fetch("/api/stats"),
+      fetch("/api/tasks?page=1"),
+    ]);
+    const stats = await statsRes.json();
+    const { data } = await tasksRes.json();
+
+    document.getElementById("stat-total").textContent      = stats.total;
+    document.getElementById("stat-todo").textContent       = stats.todo;
+    document.getElementById("stat-inprogress").textContent = stats.inProgress;
+    document.getElementById("stat-done").textContent       = stats.done;
+    document.getElementById("stat-blocked").textContent    = stats.blocked;
+    document.getElementById("stat-overdue").textContent    = stats.overdue;
+    document.getElementById("stat-critical").textContent   = stats.critical;
+
+    const tbody = document.getElementById("recent-tbody");
+    if (!data.length) {
+      tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No tasks.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.map((t) => `
+      <tr>
+        <td class="title-cell"><a href="/task-detail.html?id=${t.id}">${escHtml(t.title)}</a></td>
+        <td>${priorityBadge(t.priority)}</td>
+        <td>${statusBadge(t.status)}</td>
+        <td>${t.dueDate || "—"}</td>
+      </tr>`).join("");
+  })();
+
+  function escHtml(s) {
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+</script>
+</body>
+</html>

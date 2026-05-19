@@ -1,0 +1,14 @@
+{
+  "name": "selenium-test-webapp",
+  "version": "1.0.0",
+  "description": "Multi-page webapp used as a Selenium QA portfolio test target",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node --watch app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.3",
+    "express-session": "^1.18.0"
+  }
+}

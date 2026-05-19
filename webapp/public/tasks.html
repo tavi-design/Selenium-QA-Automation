@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Tasks – Task Manager</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<nav>
+  <span class="brand">Task Manager</span>
+  <a href="/dashboard.html">Dashboard</a>
+  <a href="/tasks.html" class="active">Tasks</a>
+  <a href="/profile.html">Profile</a>
+  <span class="spacer"></span>
+  <span id="nav-user" style="font-size:.85rem;color:#94a3b8;margin-right:12px"></span>
+  <button id="logout-btn" onclick="logout()">Logout</button>
+</nav>
+
+<div class="page">
+  <div class="top-bar">
+    <h1>Tasks</h1>
+    <a id="new-task-btn" href="/task-form.html" class="btn btn-primary">+ New Task</a>
+  </div>
+
+  <div class="card">
+    <!-- Filters -->
+    <div class="filters">
+      <input id="search-input" type="text" placeholder="Search title or description…" />
+      <select id="filter-priority">
+        <option value="">All Priorities</option>
+        <option>LOW</option><option>MEDIUM</option><option>HIGH</option><option>CRITICAL</option>
+      </select>
+      <select id="filter-status">
+        <option value="">All Statuses</option>
+        <option>TODO</option><option>IN_PROGRESS</option><option>DONE</option><option>BLOCKED</option>
+      </select>
+      <select id="filter-category">
+        <option value="">All Categories</option>
+        <option>Bug</option><option>Feature</option><option>Documentation</option><option>Testing</option><option>DevOps</option>
+      </select>
+      <button id="search-btn" class="btn">Search</button>
+      <button id="clear-btn"  class="btn">Clear</button>
+    </div>
+
+    <!-- Table -->
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Title</th><th>Priority</th><th>Status</th><th>Category</th><th>Assignee</th><th>Due Date</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="task-tbody">
+        <tr><td colspan="8" class="empty-state">Loading…</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <button id="prev-btn" disabled>← Prev</button>
+      <span id="page-info"></span>
+      <button id="next-btn" disabled>Next →</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/common.js"></script>
+<script>
+  let currentPage = 1;
+
+  async function load() {
+    const search   = document.getElementById("search-input").value;
+    const priority = document.getElementById("filter-priority").value;
+    const status   = document.getElementById("filter-status").value;
+    const category = document.getElementById("filter-category").value;
+
+    const params = new URLSearchParams({ search, priority, status, category, page: currentPage });
+    const res    = await fetch(`/api/tasks?${params}`);
+    const { data, total, page, totalPages } = await res.json();
+
+    const tbody = document.getElementById("task-tbody");
+    if (!data.length) {
+      tbody.innerHTML = `<tr><td colspan="8" class="empty-state" id="no-results">No tasks found.</td></tr>`;
+    } else {
+      tbody.innerHTML = data.map((t) => `
+        <tr data-task-id="${t.id}">
+          <td>${t.id}</td>
+          <td class="title-cell"><a href="/task-detail.html?id=${t.id}">${escHtml(t.title)}</a></td>
+          <td>${priorityBadge(t.priority)}</td>
+          <td>${statusBadge(t.status)}</td>
+          <td>${t.category}</td>
+          <td>${t.assignee}</td>
+          <td>${t.dueDate || "—"}</td>
+          <td>
+            <div class="action-group">
+              <a href="/task-form.html?id=${t.id}" class="btn btn-secondary btn-sm">Edit</a>
+              <button class="btn btn-danger btn-sm delete-btn" data-id="${t.id}">Delete</button>
+            </div>
+          </td>
+        </tr>`).join("");
+    }
+
+    document.getElementById("page-info").textContent = `Page ${page} of ${totalPages} (${total} tasks)`;
+    document.getElementById("prev-btn").disabled = page <= 1;
+    document.getElementById("next-btn").disabled = page >= totalPages;
+  }
+
+  document.getElementById("search-btn").addEventListener("click", () => { currentPage = 1; load(); });
+  document.getElementById("clear-btn").addEventListener("click",  () => {
+    document.getElementById("search-input").value = "";
+    document.getElementById("filter-priority").value = "";
+    document.getElementById("filter-status").value   = "";
+    document.getElementById("filter-category").value = "";
+    currentPage = 1; load();
+  });
+  document.getElementById("prev-btn").addEventListener("click", () => { currentPage--; load(); });
+  document.getElementById("next-btn").addEventListener("click", () => { currentPage++; load(); });
+
+  document.getElementById("task-tbody").addEventListener("click", async (e) => {
+    const btn = e.target.closest(".delete-btn");
+    if (!btn) return;
+    if (!confirm("Delete this task?")) return;
+    await fetch(`/api/tasks/${btn.dataset.id}`, { method: "DELETE" });
+    load();
+  });
+
+  function escHtml(s) {
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  (async () => {
+    const user = await requireAuth();
+    if (!user) return;
+    document.getElementById("nav-user").textContent = user.name;
+    load();
+  })();
+</script>
+</body>
+</html>

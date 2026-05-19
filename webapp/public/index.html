@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Task Manager</title>
+  <script>
+    // Root redirect: go to dashboard if logged in, otherwise login
+    fetch("/api/auth/me")
+      .then((r) => window.location.href = r.ok ? "/dashboard.html" : "/login.html")
+      .catch(() => window.location.href = "/login.html");
+  </script>
+</head>
+<body></body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Task Detail – Task Manager</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<nav>
+  <span class="brand">Task Manager</span>
+  <a href="/dashboard.html">Dashboard</a>
+  <a href="/tasks.html">Tasks</a>
+  <a href="/profile.html">Profile</a>
+  <span class="spacer"></span>
+  <span id="nav-user" style="font-size:.85rem;color:#94a3b8;margin-right:12px"></span>
+  <button id="logout-btn" onclick="logout()">Logout</button>
+</nav>
+
+<div class="page">
+  <div class="top-bar">
+    <h1 id="task-title">Loading…</h1>
+    <div class="action-group">
+      <a id="edit-btn" href="#" class="btn btn-primary btn-sm">Edit</a>
+      <button id="delete-btn" class="btn btn-danger btn-sm">Delete</button>
+      <a href="/tasks.html" class="btn btn-secondary btn-sm">← Back</a>
+    </div>
+  </div>
+
+  <div class="form-card" style="max-width:700px">
+    <table style="width:100%;font-size:.9rem;border-collapse:collapse">
+      <tbody id="detail-body">
+        <tr><td colspan="2" class="empty-state">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="/js/common.js"></script>
+<script>
+  const id = new URLSearchParams(location.search).get("id");
+
+  (async () => {
+    const user = await requireAuth();
+    if (!user) return;
+    document.getElementById("nav-user").textContent = user.name;
+
+    if (!id) { window.location.href = "/tasks.html"; return; }
+
+    const res = await fetch(`/api/tasks/${id}`);
+    if (!res.ok) { alert("Task not found"); window.location.href = "/tasks.html"; return; }
+    const t = await res.json();
+
+    document.getElementById("task-title").textContent = t.title;
+    document.getElementById("edit-btn").href = `/task-form.html?id=${t.id}`;
+    document.title = `${t.title} – Task Manager`;
+
+    const rows = [
+      ["Priority",    priorityBadge(t.priority)],
+      ["Status",      statusBadge(t.status)],
+      ["Category",    t.category],
+      ["Assignee",    t.assignee],
+      ["Due Date",    t.dueDate || "—"],
+      ["Created At",  new Date(t.createdAt).toLocaleString()],
+      ["Description", `<span id="task-description">${escHtml(t.description)}</span>`],
+    ];
+
+    document.getElementById("detail-body").innerHTML = rows.map(([k, v]) => `
+      <tr style="border-bottom:1px solid #f3f4f6">
+        <td style="padding:10px 14px;width:140px;font-weight:600;color:#6b7280;vertical-align:top">${k}</td>
+        <td style="padding:10px 14px">${v}</td>
+      </tr>`).join("");
+
+    document.getElementById("delete-btn").addEventListener("click", async () => {
+      if (!confirm("Delete this task?")) return;
+      await fetch(`/api/tasks/${t.id}`, { method: "DELETE" });
+      window.location.href = "/tasks.html";
+    });
+  })();
+
+  function escHtml(s) {
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Task – Task Manager</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<nav>
+  <span class="brand">Task Manager</span>
+  <a href="/dashboard.html">Dashboard</a>
+  <a href="/tasks.html">Tasks</a>
+  <a href="/profile.html">Profile</a>
+  <span class="spacer"></span>
+  <span id="nav-user" style="font-size:.85rem;color:#94a3b8;margin-right:12px"></span>
+  <button id="logout-btn" onclick="logout()">Logout</button>
+</nav>
+
+<div class="page">
+  <div class="top-bar">
+    <h1 id="page-heading">New Task</h1>
+    <a href="/tasks.html" class="btn btn-secondary btn-sm">← Back to Tasks</a>
+  </div>
+
+  <div class="form-card">
+    <form id="task-form" novalidate>
+      <div class="form-group">
+        <label for="title">Title <span style="color:#dc2626">*</span></label>
+        <input id="title" type="text" placeholder="Task title" maxlength="200" />
+        <p id="title-error" class="error-msg"></p>
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" placeholder="Optional details…"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="priority">Priority <span style="color:#dc2626">*</span></label>
+        <select id="priority">
+          <option value="">— select —</option>
+          <option>LOW</option><option>MEDIUM</option><option>HIGH</option><option>CRITICAL</option>
+        </select>
+        <p id="priority-error" class="error-msg"></p>
+      </div>
+      <div class="form-group">
+        <label for="status">Status <span style="color:#dc2626">*</span></label>
+        <select id="status">
+          <option value="">— select —</option>
+          <option>TODO</option><option>IN_PROGRESS</option><option>DONE</option><option>BLOCKED</option>
+        </select>
+        <p id="status-error" class="error-msg"></p>
+      </div>
+      <div class="form-group">
+        <label for="category">Category <span style="color:#dc2626">*</span></label>
+        <select id="category">
+          <option value="">— select —</option>
+          <option>Bug</option><option>Feature</option><option>Documentation</option><option>Testing</option><option>DevOps</option>
+        </select>
+        <p id="category-error" class="error-msg"></p>
+      </div>
+      <div class="form-group">
+        <label for="assignee">Assignee</label>
+        <input id="assignee" type="text" placeholder="username" />
+      </div>
+      <div class="form-group">
+        <label for="dueDate">Due Date</label>
+        <input id="dueDate" type="date" />
+      </div>
+
+      <p id="form-error"   class="error-msg"></p>
+      <p id="form-success" class="success-msg"></p>
+
+      <div class="action-group">
+        <button id="submit-btn" class="btn btn-primary" type="submit">Save Task</button>
+        <a href="/tasks.html" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/common.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  const editId = params.get("id");
+
+  (async () => {
+    const user = await requireAuth();
+    if (!user) return;
+    document.getElementById("nav-user").textContent = user.name;
+
+    if (editId) {
+      document.getElementById("page-heading").textContent = "Edit Task";
+      document.title = "Edit Task – Task Manager";
+      const res = await fetch(`/api/tasks/${editId}`);
+      if (!res.ok) { alert("Task not found"); window.location.href = "/tasks.html"; return; }
+      const t = await res.json();
+      document.getElementById("title").value       = t.title;
+      document.getElementById("description").value = t.description;
+      document.getElementById("priority").value    = t.priority;
+      document.getElementById("status").value      = t.status;
+      document.getElementById("category").value    = t.category;
+      document.getElementById("assignee").value    = t.assignee;
+      document.getElementById("dueDate").value     = t.dueDate || "";
+    }
+  })();
+
+  document.getElementById("task-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    // Clear errors
+    ["title","priority","status","category"].forEach((f) =>
+      document.getElementById(`${f}-error`).textContent = "");
+    document.getElementById("form-error").textContent   = "";
+    document.getElementById("form-success").textContent = "";
+
+    const body = {
+      title:       document.getElementById("title").value.trim(),
+      description: document.getElementById("description").value.trim(),
+      priority:    document.getElementById("priority").value,
+      status:      document.getElementById("status").value,
+      category:    document.getElementById("category").value,
+      assignee:    document.getElementById("assignee").value.trim(),
+      dueDate:     document.getElementById("dueDate").value || null,
+    };
+
+    let valid = true;
+    if (!body.title)    { document.getElementById("title-error").textContent    = "Title is required.";    valid = false; }
+    if (!body.priority) { document.getElementById("priority-error").textContent = "Priority is required."; valid = false; }
+    if (!body.status)   { document.getElementById("status-error").textContent   = "Status is required.";   valid = false; }
+    if (!body.category) { document.getElementById("category-error").textContent = "Category is required."; valid = false; }
+    if (!valid) return;
+
+    const url    = editId ? `/api/tasks/${editId}` : "/api/tasks";
+    const method = editId ? "PUT" : "POST";
+    const res    = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+
+    if (res.ok) {
+      document.getElementById("form-success").textContent = editId ? "Task updated." : "Task created.";
+      setTimeout(() => window.location.href = "/tasks.html", 800);
+    } else {
+      const data = await res.json();
+      document.getElementById("form-error").textContent = data.error || "Something went wrong.";
+    }
+  });
+</script>
+</body>
+</html>
