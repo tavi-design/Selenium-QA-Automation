@@ -50,20 +50,22 @@ jobs:
 
       - name: Install Chrome
         uses: browser-actions/setup-chrome@v1
+        id: setup-chrome
+
+      - name: Set Chrome paths
+        run: |
+          echo "CHROME_BIN=$(which google-chrome || which chromium-browser || which chrome)" >> $GITHUB_ENV
+          echo "CHROMEDRIVER_PATH=$(which chromedriver)" >> $GITHUB_ENV
 
       - name: Run smoke tests
         run: pytest -m smoke --tb=short
         env:
-          CHROME_BIN: /usr/bin/google-chrome
-          CHROMEDRIVER_PATH: /usr/local/bin/chromedriver
           WEBAPP_URL: http://localhost:3000
 
       - name: Run full test suite
         if: github.event_name == 'pull_request'
         run: pytest --tb=short
         env:
-          CHROME_BIN: /usr/bin/google-chrome
-          CHROMEDRIVER_PATH: /usr/local/bin/chromedriver
           WEBAPP_URL: http://localhost:3000
 
       - name: Upload test report
