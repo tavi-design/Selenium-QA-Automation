@@ -142,24 +142,31 @@ class TestFullUserJourney:
         assignee="Tavi"
         due_date="01/05/2025"
 
-        next_priority = "IN_PROGRESS"
-        last_priority = "DONE"
-
+        next_status = "IN_PROGRESS"
+        last_status = "DONE"
+        #Snapshot DONE amount
         dashboard_page.open()
-        done_tasks_before = dashboard_page.get_stat("DONE")
+        done_tasks_before = dashboard_page.done
+        #Create TODO Task
         tasks_page.open()
         tasks_page.click_new_task()
         task_form.fill(title, description, priority, status, category, assignee, due_date)
+        task_form.submit()
+        #edit to IN_PROGRESS
         tasks_page.search(title)
         tasks_page.click_task_title(title)
         task_detail.edit()
-        task_form.fill(title, description, next_priority, status, category, assignee, due_date)
+        task_form.fill(title, description, priority, next_status, category, assignee, due_date)
+        task_form.submit()
+        #edit to DONE
         tasks_page.search(title)
         tasks_page.click_task_title(title)
         task_detail.edit()
-        task_form.fill(title, description, last_priority, status, category, assignee, due_date)
+        task_form.fill(title, description, priority, last_status, category, assignee, due_date)
+        task_form.submit()
+        #Snapshot DONE amount
         dashboard_page.open()
-        done_tasks_after = dashboard_page.get_stat("DONE")
+        done_tasks_after = dashboard_page.done
 
         assert done_tasks_after == done_tasks_before + 1
 

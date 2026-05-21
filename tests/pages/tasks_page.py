@@ -1,3 +1,4 @@
+import re
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -161,6 +162,12 @@ class TasksPage(BasePage):
         page_index = next((i for i, v in enumerate(page_info_split) if "Page" in v), -1)
         
         return page_info_split[page_index+1]
+    
+    def get_task_count(self) -> int:
+        page_info = self.get_page_info_text()
+        match = re.search(r'\((\d+) tasks\)', page_info)
+        count = int(match.group(1))
+        return count
         
 
 
@@ -192,6 +199,9 @@ class TasksPage(BasePage):
         locator = (By.XPATH, f"//td[@class='title-cell']/a[text()='{title}']")
         self.wait_for_clickable(*locator).click()
 
+    def click_task_by_id(self, id: str):
+        locator = (By.XPATH, f"//tr[@data-task-id='{id}']/td[@class='title-cell']/a")
+        self.wait_for_clickable(*locator).click()
 
 
 class TaskFormPage(BasePage):
@@ -286,6 +296,16 @@ class TaskDetailPage(BasePage):
         self.driver.switch_to.alert.accept()
         self.wait_for_url_contains("tasks.html")
 
+    def delete_task_press_twice(self):
+        delete_btn = self.driver.find_element(*self.DELETE_BTN)
+        self.driver.execute_script("arguments[0].click(); arguments[0].click();", delete_btn)
+        self.driver.switch_to.alert.accept()
+        #handle second alert if applicable
+        try: 
+            self.driver.switch_to.alert.accept()
+        except:
+            pass
+        self.wait_for_url_contains("tasks.html")
 
     def get_details(self) -> dict:
         rows = self.driver.find_elements(By.XPATH, "//tbody[@id='detail-body']/tr")

@@ -20,8 +20,9 @@ class DashboardPage(BasePage):
     # ── Getters ───────────────────────────────────────────────────────────────
 
     def get_stat(self, stat_id: str) -> int:
+        self._wait.until(lambda d: d.find_element(By.ID, stat_id).text.isdigit())
         text = self.wait_for_element(By.ID, stat_id).text
-        return int(text) if text.isdigit() else -1
+        return int(text)
 
     @property
     def total(self) -> int:

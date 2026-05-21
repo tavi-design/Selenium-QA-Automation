@@ -142,7 +142,7 @@ One journey is already implemented as a reference. Implement the remaining three
 - [*] `test_create_task_end_to_end` — full create → view → delete journey without touching the API directly
 - [*] `test_search_filter_pagination_journey` — multi-step filter + pagination flow
 - [*] `test_profile_update_journey` — update name, verify nav bar updates, refresh, verify persists
-- [ ] `test_task_status_lifecycle` — move a task through TODO → IN_PROGRESS → DONE, verify dashboard counter
+- [*] `test_task_status_lifecycle` — move a task through TODO → IN_PROGRESS → DONE, verify dashboard counter
 
 ---
 
@@ -152,12 +152,12 @@ Create a new file: `tests/test_negative.py`
 
 **Acceptance criteria:**
 
-- [ ] XSS attempt in task title — input `<script>alert(1)</script>`, assert it appears as escaped text on the detail page, not executed
-- [ ] Very long title (500 chars) — verify it is truncated or rejected cleanly, no 500 error
-- [ ] Special characters in search — `& % # @ !` — server must return 200 not 500
-- [ ] Create task with past due date — assert it is accepted (or rejected with a clear error, not a crash)
-- [ ] Concurrent rapid clicks on Delete — click Delete button twice in quick succession, assert only one request is made (check task count)
-- [ ] Add `@pytest.mark.negative` to every test in this file
+- [*] XSS attempt in task title — input `<script>alert(1)</script>`, assert it appears as escaped text on the detail page, not executed
+- [*] Very long title (500 chars) — verify it is truncated or rejected cleanly, no 500 error
+- [*] Special characters in search — `& % # @ !` — server must return 200 not 500
+- [*] Create task with past due date — assert it is accepted (or rejected with a clear error, not a crash)
+- [*] Concurrent rapid clicks on Delete — click Delete button twice in quick succession, assert only one request is made (check task count)
+- [*] Add `@pytest.mark.negative` to every test in this file
 
 ---
 
