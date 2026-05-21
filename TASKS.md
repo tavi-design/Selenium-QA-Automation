@@ -170,10 +170,10 @@ The skeleton is in place. Extend it:
 **Acceptance criteria:**
 
 - [*] Smoke tests run on every push to `main` or `develop`
-- [ ] Full suite runs only on pull requests (already in skeleton — verify it works)
-- [ ] HTML report is uploaded as a GitHub Actions artifact (already in skeleton — verify)
-- [ ] Add a job step that fails the workflow if **any** screenshot was captured (i.e. treat any UI failure as a hard failure signal)
-- [ ] Add a README badge that shows CI status
+- [*] Full suite runs only on pull requests (already in skeleton — verify it works)
+- [*] HTML report is uploaded as a GitHub Actions artifact (already in skeleton — verify)
+- [*] Add a job step that fails the workflow if **any** screenshot was captured (i.e. treat any UI failure as a hard failure signal)
+- [*] Add a README badge that shows CI status
 
 ---
 
