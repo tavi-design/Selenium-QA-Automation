@@ -51,7 +51,7 @@ jobs:
       - name: Install Chromium
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y chromium-browser chromium-chromedriver
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --no-install-recommends chromium-browser chromium-chromedriver
 
       - name: Run smoke tests
         run: pytest -m smoke --tb=short
