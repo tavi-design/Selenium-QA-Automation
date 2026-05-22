@@ -149,10 +149,9 @@ class TestTasksAPI:
         response = admin_api.get(f"{base_url}/api/tasks?priority=CRITICAL")
         body = response.json()
         tasks = body["data"]
-        if len(tasks) > 0:
-            for task in tasks:
-                priority = task["priority"]
-                assert priority == "CRITICAL"
+        assert len(tasks) > 0
+        for task in tasks:
+            assert task["priority"] == "CRITICAL"
 
 
     @pytest.mark.api
@@ -165,9 +164,9 @@ class TestTasksAPI:
         assert set(ids_first).isdisjoint(ids_second)
 
     @pytest.mark.api
-    def test_update_task_returns_updated_fields(self, admin_api, base_url):
+    def test_update_task_returns_updated_fields(self, admin_api, base_url, fresh_task):
         changed_title = "changed title"
-        response = admin_api.put(f"{base_url}/api/tasks/1",
+        response = admin_api.put(f"{base_url}/api/tasks/{fresh_task['id']}",
                                 json={"title" : changed_title})
         assert response.status_code == 200
         body = response.json()
@@ -175,10 +174,11 @@ class TestTasksAPI:
         
 
     @pytest.mark.api
-    def test_update_task_invalid_priority_returns_400(self, admin_api, base_url):
+    def test_update_task_invalid_priority_returns_400(self, admin_api, base_url, fresh_task):
         incorrect_priority = "WrongPRIORITY"
-        response = admin_api.put(f"{base_url}/api/tasks/1",
-                                 json={"priority" : incorrect_priority })
+        response = admin_api.put(f"{base_url}/api/tasks/{fresh_task['id']}",
+                                  json={"priority" : incorrect_priority })
+
         assert response.status_code == 400
 
 

@@ -1,0 +1,14 @@
+[
+  { "username": "", "password": "", "description": "empty credentials" },
+  {
+    "username": "wronguser",
+    "password": "admin123",
+    "description": "wrong username"
+  },
+  {
+    "username": "admin",
+    "password": "wrongpass",
+    "description": "wrong password"
+  },
+  { "username": "' OR 1=1 --", "password": "x", "description": "sql injection" }
+]

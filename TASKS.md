@@ -183,10 +183,10 @@ The skeleton is in place. Extend it:
 
 **Acceptance criteria:**
 
-- [ ] Create a `fresh_task` pytest fixture in `conftest.py` that POSTs a task via `admin_api`, yields the task dict, and DELETEs it in teardown — no test should rely on a specific seed-data ID
-- [ ] Audit TICKET-3 and TICKET-7 tests: replace any hardcoded `id=1` with the `fresh_task` fixture
-- [ ] Create a `tests/data/` directory with `users.json` and `tasks.json` containing test data sets
-- [ ] Parametrize at least two tests using data loaded from those JSON files
+- [*] Create a `fresh_task` pytest fixture in `conftest.py` that POSTs a task via `admin_api`, yields the task dict, and DELETEs it in teardown — no test should rely on a specific seed-data ID
+- [*] Audit TICKET-3 and TICKET-7 tests: replace any hardcoded `id=1` with the `fresh_task` fixture
+- [*] Create a `tests/data/` directory with `users.json` and `tasks.json` containing test data sets
+- [*] Parametrize at least two tests using data loaded from those JSON files
 
 ---
 

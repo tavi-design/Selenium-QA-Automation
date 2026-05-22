@@ -37,8 +37,6 @@ class TestSearch:
         tasks_page.search("zzznoresultszzz")
         assert tasks_page.is_no_results_visible()
 
-    # TODO [TICKET-4]: test_clear_resets_search
-    #   — search for "login", then clear_filters(), assert row count == 10
 
     def test_clear_resets_search(self, tasks_page: TasksPage):
         original_rows = tasks_page.get_all_task_ids()
@@ -47,17 +45,13 @@ class TestSearch:
         cleared_rows = tasks_page.get_all_task_ids()
         assert original_rows == cleared_rows
 
-    # TODO [TICKET-4]: test_filter_by_priority_critical
-    #   — implement filter_by_priority in TasksPage, filter by CRITICAL,
-    #     assert all visible rows show "CRITICAL" badge
-    def test_fiter_by_priority_critical(self, tasks_page: TasksPage):
+
+    def test_filter_by_priority_critical(self, tasks_page: TasksPage):
         tasks_page.filter_by_priority("CRITICAL")
         assert all(priority == "CRITICAL" for priority in tasks_page.get_all_tasks_priorities())
         
         
 
-    # TODO [TICKET-4]: test_filter_by_status_done
-    #   — filter by DONE, assert all visible rows show "DONE" badge
     def test_filter_by_status_done(self, tasks_page: TasksPage):
         tasks_page.filter_by_status("DONE")
         assert all(status == "DONE" for status in tasks_page.get_all_tasks_statuses())
@@ -67,8 +61,6 @@ class TestSearch:
         tasks_page.filter_by_category("Testing")
         assert all(category == "Testing" for category in tasks_page.get_all_tasks_categories())
 
-    # TODO [TICKET-4]: test_combined_filter_priority_and_status
-    #   — filter HIGH + IN_PROGRESS, assert count matches API response
     def test_combined_filter_priority_and_status(self, tasks_page: TasksPage, admin_api, base_url):
         tasks_page.filter_by_status("IN_PROGRESS")
         tasks_page.filter_by_priority("HIGH")

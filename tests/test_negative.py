@@ -1,14 +1,5 @@
 import pytest
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait, Select
-from selenium.webdriver.support import expected_conditions as EC
-
-from tests.pages.base_page import BasePage
-from tests.pages.login_page import LoginPage
-from tests.pages.dashboard_page import DashboardPage
-from tests.pages.profile_page import ProfilePage
-from tests.pages.tasks_page import TaskDetailPage, TasksPage
-from tests.pages.tasks_page import TaskFormPage
+from tests.pages.tasks_page import TaskDetailPage, TasksPage, TaskFormPage
 from selenium.common.exceptions import NoAlertPresentException
 
 class TestNegative:
@@ -28,13 +19,12 @@ class TestNegative:
         assert details["title"] == payload_title
 
         try:
-            tasks_page.driver.switch_to.alert
+            tasks_page.driver.switch_to.alert.text
             assert False, "XSS alert was executed"
         except NoAlertPresentException:
             pass
         
 
-    #- [ ] Very long title (500 chars) — verify it is truncated or rejected cleanly, no 500 error
     @pytest.mark.negative
     def test_long_title(self, admin_api, base_url):
         test_data = {
@@ -46,13 +36,12 @@ class TestNegative:
         r = admin_api.post(f"{base_url}/api/tasks", json=test_data)
         assert r.status_code != 500
     
-    #- [ ] Special characters in search — `& % # @ !` — server must return 200 not 500
+
     @pytest.mark.negative
     def test_search_special_characters(self, admin_api, base_url):
         r = admin_api.get(f"{base_url}/api/tasks", params={"search": "& % # @ !"})
         assert r.status_code == 200
 
-    # - [ ] Create task with past due date — assert it is accepted (or rejected with a clear error, not a crash)
 
     @pytest.mark.negative
     def test_past_due_date(self, admin_api, base_url):
@@ -63,10 +52,10 @@ class TestNegative:
             "category": "Testing",
             "dueDate": "2020-01-01"
         })
-        assert r.status_code in [200, 201, 400]
+        assert r.status_code in [201, 400]
 
     @pytest.mark.negative
-    #- [ ] Concurrent rapid clicks on Delete — click Delete button twice in quick succession, assert only one request is made (check task count)
+
     def test_concurrent_delete(self, tasks_page: TasksPage, task_detail: TaskDetailPage):
 
         tasks_page.open()

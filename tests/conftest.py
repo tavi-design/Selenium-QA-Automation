@@ -28,11 +28,25 @@ def driver():
 
     service = Service(executable_path=os.environ.get("CHROMEDRIVER_PATH", "/usr/bin/chromedriver"))
     d = webdriver.Chrome(service=service, options=options)
-    d.implicitly_wait(0)  # rely on explicit waits in POMs — no implicit wait
+    d.implicitly_wait(0)
     yield d
     d.quit()
 
+# -- FreshTask fixture ---------------------------------
 
+@pytest.fixture
+def fresh_task(admin_api, base_url):
+    r = admin_api.post(f"{base_url}/api/tasks", json={
+        "title" : "Fresh test task",
+        "priority" : "MEDIUM",
+        "status" : "TODO",
+        "category" : "Testing"
+    })
+    task = r.json()
+
+    yield task
+
+    admin_api.delete(f"{base_url}/api/tasks/{task['id']}")
 # ── Screenshot on failure ─────────────────────────────────────────────────────
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)

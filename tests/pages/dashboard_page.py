@@ -46,7 +46,4 @@ class DashboardPage(BasePage):
         rows = self.driver.find_elements(*self.RECENT_ROWS)
         return len(rows)
 
-    # TODO: Add method to click "View all" link
-    def view_all(self):
-        self.driver.find_element()
-    # TODO: Add method to click a task title in the recent list
+
